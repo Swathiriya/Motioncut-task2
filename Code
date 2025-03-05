@@ -1,0 +1,102 @@
+# Motioncut-task2
+import java.io.*;
+import java.util.*;
+
+class Expense {
+    private String category;
+    private String description;
+    private double amount;
+    private Date date;
+
+    public Expense(String category, String description, double amount) {
+        this.category = category;
+        this.description = description;
+        this.amount = amount;
+        this.date = new Date();
+    }
+
+    public String toString() {
+        return date + " | " + category + " | " + description + " | " + amount;
+    }
+
+    public double getAmount() {
+        return amount;
+    }
+
+    public Date getDate() {
+        return date;
+    }
+}
+
+class ExpenseManager {
+    private List<Expense> expenses;
+    private static final String FILE_NAME = "expenses.txt";
+
+    public ExpenseManager() {
+        expenses = new ArrayList<>();
+        loadExpenses();
+    }
+
+    public void addExpense(String category, String description, double amount) {
+        Expense expense = new Expense(category, description, amount);
+        expenses.add(expense);
+        saveExpenseToFile(expense);
+    }
+
+    private void saveExpenseToFile(Expense expense) {
+        try (FileWriter writer = new FileWriter(FILE_NAME, true)) {
+            writer.write(expense.toString() + "\n");
+        } catch (IOException e) {
+            System.out.println("Error saving expense: " + e.getMessage());
+        }
+    }
+
+    private void loadExpenses() {
+        try (BufferedReader reader = new BufferedReader(new FileReader(FILE_NAME))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                System.out.println(line);
+            }
+        } catch (IOException e) {
+            System.out.println("No previous expense records found.");
+        }
+    }
+
+    public double getTotalExpenses() {
+        return expenses.stream().mapToDouble(Expense::getAmount).sum();
+    }
+}
+
+public class ExpenseTracker {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        ExpenseManager manager = new ExpenseManager();
+
+        while (true) {
+            System.out.println("\n1. Add Expense\n2. View Total Expenses\n3. Exit");
+            System.out.print("Choose an option: ");
+            int choice = scanner.nextInt();
+            scanner.nextLine();
+
+            switch (choice) {
+                case 1:
+                    System.out.print("Enter Category: ");
+                    String category = scanner.nextLine();
+                    System.out.print("Enter Description: ");
+                    String description = scanner.nextLine();
+                    System.out.print("Enter Amount: ");
+                    double amount = scanner.nextDouble();
+                    manager.addExpense(category, description, amount);
+                    break;
+                case 2:
+                    System.out.println("Total Expenses: " + manager.getTotalExpenses());
+                    break;
+                case 3:
+                    System.out.println("Exiting... Goodbye!");
+                    return;
+                default:
+                    System.out.println("Invalid option. Try again.");
+            }
+        }
+    }
+}
